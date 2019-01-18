@@ -25,6 +25,7 @@ Types of requests:
 He sugests ussing RSS feeds to simply the agregator agent:
 * (http://feeds.dn.pt/DN-Ultimas) ou versões mobile
 * (http://m.dn.pt/m/home) como fonte de notícias. 
+* CNN rss feed example -> http://rss.cnn.com/rss/edition.rss
 
 He also sugests we having an extra presenter/finder agent to present the window were the keywords are, and another to launch the browser with the answears page, whatever that means.
 
