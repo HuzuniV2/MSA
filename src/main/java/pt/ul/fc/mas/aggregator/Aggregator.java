@@ -15,8 +15,7 @@ import java.util.Vector;
 import java.util.Enumeration;
 
 /**
- * @author Utilizador
- *         This agent asks the others for news and aggregates them
+ * This agent aggregates the news gathered from the NewsFinder agents.
  */
 public class Aggregator extends Agent {
     private int nResponders;
