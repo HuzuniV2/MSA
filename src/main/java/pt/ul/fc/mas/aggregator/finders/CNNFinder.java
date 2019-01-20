@@ -69,7 +69,6 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-        	 
                 return found;
             }
 

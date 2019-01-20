@@ -8,4 +8,8 @@ public class News {
     public News(String content) {
         this.content = content;
     }
+
+    public String getContent() {
+        return content;
+    }
 }

@@ -1,5 +1,6 @@
 package pt.ul.fc.mas.aggregator.finders;
 
+import com.google.gson.Gson;
 import jade.core.Agent;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
@@ -31,9 +32,8 @@ public abstract class NewsFinderBehaviour extends ContractNetResponder {
     @Override
     protected ACLMessage handleCfp(ACLMessage cfp) throws NotUnderstoodException, RefuseException {
         System.out.println("Agent " + myAgent.getLocalName() + ": CFP received from " + cfp.getSender().getName() + ". Action is " + cfp.getContent());
-
-        // TODO: parse search query from message content.
-        SearchQuery query = new SearchQuery(SearchQuery.SearchType.TITLE, "Błaszczykowski");
+        Gson gson = new Gson();
+        SearchQuery query = gson.fromJson(cfp.getContent(), SearchQuery.class);
 
         boolean proposal = evaluateSearchQuery(query);
         if (proposal) {
@@ -55,17 +55,15 @@ public abstract class NewsFinderBehaviour extends ContractNetResponder {
     @Override
     protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) throws FailureException {
         System.out.println("Agent " + myAgent.getLocalName() + ": Proposal accepted");
-
-        // TODO: parse search query from message content.
-        SearchQuery query = new SearchQuery(SearchQuery.SearchType.TITLE, "Błaszczykowski");
+        Gson gson = new Gson();
+        SearchQuery query = gson.fromJson(cfp.getContent(), SearchQuery.class);
 
         NewsSearchResult newsSearchResult = performSearch(query);
         if (newsSearchResult.getResults().size() > 0) {
             System.out.println("Agent " + myAgent.getLocalName() + ": Action successfully performed");
             ACLMessage inform = accept.createReply();
             inform.setPerformative(ACLMessage.INFORM);
-
-            //TODO: Send results in the message.
+            inform.setContent(gson.toJson(newsSearchResult));
             return inform;
         } else {
             System.out.println("Agent " + myAgent.getLocalName() + ": Action execution failed");
