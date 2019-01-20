@@ -1,35 +1,21 @@
 package pt.ul.fc.mas.aggregator.finders;
 
 import com.google.common.collect.ImmutableList;
-import jade.core.Agent;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import pt.ul.fc.mas.aggregator.model.NewsSearchResult;
 import pt.ul.fc.mas.aggregator.model.SearchQuery;
 
-/**
- * @author Nuno Rodrigues fc44825
- */
-public class CNNFinder extends Agent {
+public class CNNFinder extends NewsFinderAgent {
 
+    public CNNFinder(String category) {
+        super(category);
+    }
+
+    @Override
     protected void setup() {
-
-        DFAgentDescription dfd = new DFAgentDescription();
-        dfd.setName(getAID());
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType("Presenter");
-        sd.setName(getLocalName() + "-presenter");
-        dfd.addServices(sd);
-        try {
-            DFService.register(this, dfd);
-        } catch (FIPAException fe) {
-            fe.printStackTrace();
-        }
+        super.setupAgent("Finder", getLocalName() + "-finder");
 
         System.out.println("Agent " + getLocalName() + " waiting for CFP...");
         MessageTemplate template = MessageTemplate.and(
