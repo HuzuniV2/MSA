@@ -7,3 +7,8 @@ gen
 target/
 
 *.txt
+
+# Eclipse
+.project
+.classpath
+.settings/
