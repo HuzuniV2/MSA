@@ -1,4 +1,4 @@
-package pt.ul.fc.mas.aggregator.presenters;
+package pt.ul.fc.mas.aggregator.finders;
 
 import jade.core.Agent;
 import jade.domain.FIPAAgentManagement.FailureException;

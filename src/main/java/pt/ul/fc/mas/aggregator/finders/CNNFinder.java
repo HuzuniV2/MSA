@@ -1,4 +1,4 @@
-package pt.ul.fc.mas.aggregator.presenters;
+package pt.ul.fc.mas.aggregator.finders;
 
 import com.google.common.collect.ImmutableList;
 import jade.core.Agent;
@@ -15,7 +15,7 @@ import pt.ul.fc.mas.aggregator.model.SearchQuery;
 /**
  * @author Nuno Rodrigues fc44825
  */
-public class SkyNewsFinder extends Agent {
+public class CNNFinder extends Agent {
 
     protected void setup() {
 
