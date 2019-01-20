@@ -1,22 +1,55 @@
 package pt.ul.fc.mas.aggregator;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import com.google.common.collect.ImmutableList;
+import jade.Boot;
+import jade.core.Profile;
+import jade.core.ProfileImpl;
+import jade.core.Runtime;
+import jade.wrapper.AgentContainer;
+import jade.wrapper.AgentController;
+import jade.wrapper.StaleProxyException;
+import pt.ul.fc.mas.aggregator.finders.CNNFinder;
+import pt.ul.fc.mas.aggregator.finders.SkyNewsFinder;
 
 public class Runner {
     public static void main(String[] args) {
 
+        String[] opts = {
+            "-gui",
+            "-local-host 127.0.0.1",
+            "-port 1222",
+        };
+        Boot.main(opts);
+
+        Profile profile = new ProfileImpl();
+        profile.setParameter(Profile.CONTAINER_NAME, "NewsAggregator");
+        profile.setParameter(Profile.MAIN_HOST, "localhost");
+        AgentContainer container = Runtime.instance().createAgentContainer(profile);
         try {
-            URL myURL = new URL("https://www.dn.pt/");
-            URLConnection myURLConnection = myURL.openConnection();
-            myURLConnection.connect();
-            System.out.println("ok");
-        } catch (MalformedURLException e) {
-            System.out.println("not ok");
-        } catch (IOException e) {
-            System.out.println("not ok also");
+            for (String topic : ImmutableList.of("Sport", "Politics", "Science")) {
+                container.createNewAgent(
+                    "CNNFinder-" + topic, CNNFinder.class.getName(), new Object[]{topic}).start();
+                container.createNewAgent(
+                    "SkyNewsFinder-" + topic, SkyNewsFinder.class.getName(), new Object[]{topic}).start();
+            }
+            AgentController aggregator =
+                container.createNewAgent(
+                    "aggregator", Aggregator.class.getName(), new Object[]{"title:Błaszczykowski"});
+            aggregator.start();
+        } catch (StaleProxyException e) {
+            System.err.println("Error while creating agents: " + e.getMessage());
+            System.exit(1);
         }
+
+//        try {
+//            URL myURL = new URL("https://www.dn.pt/");
+//            URLConnection myURLConnection = myURL.openConnection();
+//            myURLConnection.connect();
+//            System.out.println("ok");
+//        } catch (MalformedURLException e) {
+//            System.out.println("not ok");
+//        } catch (IOException e) {
+//            System.out.println("not ok also");
+//        }
     }
 }
