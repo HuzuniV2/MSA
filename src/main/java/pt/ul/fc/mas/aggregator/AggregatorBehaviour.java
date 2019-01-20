@@ -1,10 +1,13 @@
 package pt.ul.fc.mas.aggregator;
 
-import jade.core.AID;
+import com.google.gson.Gson;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
 import jade.proto.ContractNetInitiator;
+import pt.ul.fc.mas.aggregator.model.News;
+import pt.ul.fc.mas.aggregator.model.NewsSearchResult;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -45,33 +48,51 @@ public class AggregatorBehaviour extends ContractNetInitiator {
             System.out.println("Timeout expired: missing " + (nResponders - responses.size()) + " responses");
         }
         // Evaluate proposals.
-        int bestProposal = -1;
-        AID bestProposer = null;
-        ACLMessage accept = null;
         Enumeration e = responses.elements();
         while (e.hasMoreElements()) {
             ACLMessage msg = (ACLMessage) e.nextElement();
             if (msg.getPerformative() == ACLMessage.PROPOSE) {
                 ACLMessage reply = msg.createReply();
-                reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
                 acceptances.addElement(reply);
-                int proposal = Integer.parseInt(msg.getContent());
-                if (proposal > bestProposal) {
-                    bestProposal = proposal;
-                    bestProposer = msg.getSender();
-                    accept = reply;
-                }
+                System.out.println("Agent " + msg.getSender().getName() + " proposed: " + msg.getContent());
+            } else if (msg.getPerformative() == ACLMessage.REFUSE) {
+                System.out.println("Agent " + msg.getSender().getName() + " refused: " + msg.getContent());
             }
-        }
-        // Accept the proposal of the best proposer
-        if (accept != null) {
-            System.out.println("Accepting proposal " + bestProposal + " from responder " + bestProposer.getName());
-            accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
         }
     }
 
     @Override
     protected void handleInform(ACLMessage inform) {
         System.out.println("Agent " + inform.getSender().getName() + " successfully performed the requested action");
+    }
+
+    @Override
+    protected void handleAllResultNotifications(Vector resultNotifications) {
+        ArrayList<News> results = new ArrayList<>();
+        Gson gson = new Gson();
+
+        // Evaluate proposals.
+        Enumeration e = resultNotifications.elements();
+        while (e.hasMoreElements()) {
+            ACLMessage msg = (ACLMessage) e.nextElement();
+            if (msg.getPerformative() == ACLMessage.INFORM) {
+                NewsSearchResult searchResult = gson.fromJson(msg.getContent(), NewsSearchResult.class);
+                System.out.println("Agent " + msg.getSender().getName() + " found: " + searchResult.getResults().size() + " news.");
+                if (searchResult.getResults().size() > 0) {
+                    results.addAll(searchResult.getResults());
+                }
+            } else if (msg.getPerformative() == ACLMessage.FAILURE) {
+                System.out.println("Agent " + msg.getSender().getName() + " failed: " + msg.getContent());
+            }
+        }
+
+        // TODO: handle displaying the news. Send to Presenter agent?
+        NewsSearchResult newsSearch = new NewsSearchResult(results);
+        System.out.println("Found news:");
+        for (News result : results) {
+            System.out.println(result.getContent());
+            System.out.println();
+        }
     }
 }

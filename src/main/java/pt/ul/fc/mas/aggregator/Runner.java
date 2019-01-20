@@ -11,6 +11,8 @@ import jade.wrapper.StaleProxyException;
 import pt.ul.fc.mas.aggregator.finders.CNNFinder;
 import pt.ul.fc.mas.aggregator.finders.SkyNewsFinder;
 
+import java.util.List;
+
 public class Runner {
     public static void main(String[] args) {
 
@@ -25,8 +27,12 @@ public class Runner {
         profile.setParameter(Profile.CONTAINER_NAME, "NewsAggregator");
         profile.setParameter(Profile.MAIN_HOST, "localhost");
         AgentContainer container = Runtime.instance().createAgentContainer(profile);
+
+        List<String> topicList = ImmutableList.of("Sport", "Politics", "Science");
+        String searchQuery = "category:Money";
+
         try {
-            for (String topic : ImmutableList.of("Sport", "Politics", "Science")) {
+            for (String topic : topicList) {
                 container.createNewAgent(
                     "CNNFinder-" + topic, CNNFinder.class.getName(), new Object[]{topic}).start();
                 container.createNewAgent(
@@ -34,7 +40,7 @@ public class Runner {
             }
             AgentController aggregator =
                 container.createNewAgent(
-                    "aggregator", Aggregator.class.getName(), new Object[]{"title:Błaszczykowski"});
+                    "aggregator", Aggregator.class.getName(), new Object[]{searchQuery});
             aggregator.start();
         } catch (StaleProxyException e) {
             System.err.println("Error while creating agents: " + e.getMessage());
