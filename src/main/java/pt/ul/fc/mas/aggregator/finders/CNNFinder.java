@@ -1,5 +1,12 @@
 package pt.ul.fc.mas.aggregator.finders;
 
+import java.io.IOException;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import com.google.common.collect.ImmutableList;
 import jade.core.Agent;
 import jade.domain.FIPAException;
@@ -45,7 +52,25 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
             public boolean evaluateSearchQuery(SearchQuery query) {
                 // Check if the topic is in the Rss feed
                 // TODO: Implement.
-                return true;
+            	Boolean found = false;
+            	Document doc;
+				try {
+					doc = Jsoup.connect("http://edition.cnn.com/services/rss/").get();
+					Elements table = doc.select("table");
+        	        for (Element row : table.select("tr")) {
+        	            Elements tds = row.select("td");
+        	            if (tds.size() > 2 && tds.size() < 20) {
+        	                if (tds.get(0).text().equals(query.getKeyword())){
+        	                	found = true;
+        	                }
+        	            }
+        	        }
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	 
+                return found;
             }
 
             @Override
