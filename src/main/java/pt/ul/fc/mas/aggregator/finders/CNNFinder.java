@@ -1,21 +1,39 @@
 package pt.ul.fc.mas.aggregator.finders;
 
 import com.google.common.collect.ImmutableList;
+import jade.core.Agent;
+import jade.domain.FIPAException;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import pt.ul.fc.mas.aggregator.model.NewsSearchResult;
 import pt.ul.fc.mas.aggregator.model.SearchQuery;
+import pt.ul.fc.mas.aggregator.util.AgentUtils;
 
-public class CNNFinder extends NewsFinderAgent {
+public class CNNFinder extends Agent implements NewsFinderAgent {
 
-    public CNNFinder(String category) {
-        super(category);
+    private String category;
+
+    @Override
+    public String getCategory() {
+        return this.category;
     }
 
     @Override
     protected void setup() {
-        super.setupAgent("Finder", getLocalName() + "-finder");
+        try {
+            AgentUtils.registerService(this, "Finder", getLocalName() + "-finder");
+        } catch (FIPAException e) {
+            System.err.println("Error while registering agent " + getLocalName() + ": " + e.getMessage());
+        }
+
+        Object[] args = getArguments();
+        if (args.length > 0) {
+            this.category = (String) args[0];
+            System.out.println("Agent " + getLocalName() + " assigned category: " + this.category);
+        } else {
+            System.out.println("Agent " + getLocalName() + " not assigned a category.");
+        }
 
         System.out.println("Agent " + getLocalName() + " waiting for CFP...");
         MessageTemplate template = MessageTemplate.and(
