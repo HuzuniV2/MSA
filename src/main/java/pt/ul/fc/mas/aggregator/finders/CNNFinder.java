@@ -51,7 +51,7 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
             @Override
             public boolean evaluateSearchQuery(SearchQuery query) {
                 // Check if the topic is in the Rss feed
-                // TODO: Implement.
+                // TODO: Implement. only needs to check the keyword
             	Boolean found = false;
             	Document doc;
 				try {
@@ -74,7 +74,19 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
 
             @Override
             public NewsSearchResult performSearch(SearchQuery query) {
+            	switch(query.getType()) {
+            	case TITLE:
+            		break;
+            	case CONTENT:
+            		break;
+            	case CATEGORY:
+            		break;
+				default:
+					throw new IllegalArgumentException("Unknown type of keyword: " + query.getType());
+            	}
                 // if it is in the feed, get it somehow
+            	// check what the query type is
+            	// switch, depending on the query might need to scrape inside it
                 // TODO: Implement.
                 return new NewsSearchResult(ImmutableList.of());
             }

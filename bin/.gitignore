@@ -1,0 +1,14 @@
+# IntelliJ project files
+.idea/
+*.iml
+out
+gen
+
+target/
+
+*.txt
+
+# Eclipse
+.project
+.classpath
+.settings/
