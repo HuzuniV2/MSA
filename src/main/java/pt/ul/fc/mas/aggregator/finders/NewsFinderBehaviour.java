@@ -27,7 +27,7 @@ public abstract class NewsFinderBehaviour extends ContractNetResponder {
      * Finds the data for requested {@code query}.
      * @return
      */
-    public abstract NewsSearchResult performSearch(SearchQuery query);
+    public abstract NewsSearchResult performSearch(SearchQuery query) throws FailureException;
 
     @Override
     protected ACLMessage handleCfp(ACLMessage cfp) throws NotUnderstoodException, RefuseException {
@@ -59,16 +59,11 @@ public abstract class NewsFinderBehaviour extends ContractNetResponder {
         SearchQuery query = gson.fromJson(cfp.getContent(), SearchQuery.class);
 
         NewsSearchResult newsSearchResult = performSearch(query);
-        if (newsSearchResult.getResults().size() > 0) {
-            System.out.println("Agent " + myAgent.getLocalName() + ": Action successfully performed");
-            ACLMessage inform = accept.createReply();
-            inform.setPerformative(ACLMessage.INFORM);
-            inform.setContent(gson.toJson(newsSearchResult));
-            return inform;
-        } else {
-            System.out.println("Agent " + myAgent.getLocalName() + ": Action execution failed");
-            throw new FailureException("unexpected-error");
-        }
+        System.out.println("Agent " + myAgent.getLocalName() + ": Action successfully performed");
+        ACLMessage inform = accept.createReply();
+        inform.setPerformative(ACLMessage.INFORM);
+        inform.setContent(gson.toJson(newsSearchResult));
+        return inform;
     }
 
     @Override

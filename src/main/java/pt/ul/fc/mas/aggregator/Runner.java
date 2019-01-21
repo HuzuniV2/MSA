@@ -28,8 +28,8 @@ public class Runner {
         profile.setParameter(Profile.MAIN_HOST, "localhost");
         AgentContainer container = Runtime.instance().createAgentContainer(profile);
 
-        List<String> topicList = ImmutableList.of("Sport", "Politics", "Science");
-        String searchQuery = "category:Money";
+        List<String> topicList = ImmutableList.of("world", "politics", "technology");
+        String searchQuery = "title:trump";
 
         try {
             for (String topic : topicList) {
@@ -46,16 +46,5 @@ public class Runner {
             System.err.println("Error while creating agents: " + e.getMessage());
             System.exit(1);
         }
-
-//        try {
-//            URL myURL = new URL("https://www.dn.pt/");
-//            URLConnection myURLConnection = myURL.openConnection();
-//            myURLConnection.connect();
-//            System.out.println("ok");
-//        } catch (MalformedURLException e) {
-//            System.out.println("not ok");
-//        } catch (IOException e) {
-//            System.out.println("not ok also");
-//        }
     }
 }
