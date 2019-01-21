@@ -1,6 +1,9 @@
 package pt.ul.fc.mas.aggregator.finders;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -8,6 +11,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.google.common.collect.ImmutableList;
+import com.rometools.rome.feed.synd.SyndEntry;
+import com.rometools.rome.io.FeedException;
+import com.rometools.rome.io.SyndFeedInput;
+import com.rometools.rome.io.XmlReader;
+
 import jade.core.Agent;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
@@ -15,9 +23,32 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import pt.ul.fc.mas.aggregator.model.NewsSearchResult;
 import pt.ul.fc.mas.aggregator.model.SearchQuery;
+import pt.ul.fc.mas.aggregator.model.SearchQuery.SearchType;
 import pt.ul.fc.mas.aggregator.util.AgentUtils;
 
 public class CNNFinder extends Agent implements NewsFinderAgent {
+	
+	private Map<String, String> themes = new HashMap<String, String>();
+	
+	/**
+	 * Builds a Map containing key-theme and value-url from the cnn table
+	 * @param themes
+	 * @throws IOException
+	 */
+	private void getThemes(Map<String, String> themes) throws IOException{
+			Document doc = Jsoup.connect("http://edition.cnn.com/services/rss/").get();
+			Elements table = doc.select("table");
+	        for (Element row : table.select("tr")) {
+	            Elements tds = row.select("td");
+	            if (tds.size() > 2 && tds.size() < 20 && !tds.text().equals("")) {
+	                themes.put(tds.get(0).text(), tds.get(2).text());
+	            }
+	        }
+	}
+	
+	
+	
+	
 
     private String category;
 
@@ -50,26 +81,17 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
         addBehaviour(new NewsFinderBehaviour(this, template) {
             @Override
             public boolean evaluateSearchQuery(SearchQuery query) {
-                // Check if the topic is in the Rss feed
-                // TODO: Implement. only needs to check the keyword
-            	Boolean found = false;
-            	Document doc;
-				try {
-					doc = Jsoup.connect("http://edition.cnn.com/services/rss/").get();
-					Elements table = doc.select("table");
-        	        for (Element row : table.select("tr")) {
-        	            Elements tds = row.select("td");
-        	            if (tds.size() > 2 && tds.size() < 20) {
-        	                if (tds.get(0).text().equals(query.getKeyword())){
-        	                	found = true;
-        	                }
-        	            }
-        	        }
+            	try {
+					getThemes(themes);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-                return found;
+                // Checks if the query type is a valid one, if its not it refuses the contract
+            	Boolean valid = false;
+            	if (query.getType() == SearchQuery.SearchType.CATEGORY)
+            		valid = true;
+                return valid;
             }
 
             @Override
@@ -80,10 +102,31 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
             	case CONTENT:
             		break;
             	case CATEGORY:
+            		try {
+						URL feedUrl = new URL(themes.get(query.getType()));
+						SyndFeedInput input = new SyndFeedInput();
+		                try {
+							List<SyndEntry> feed = input.build(new XmlReader(feedUrl)).getEntries();
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (FeedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+            		
             		break;
 				default:
 					throw new IllegalArgumentException("Unknown type of keyword: " + query.getType());
             	}
+				
                 // if it is in the feed, get it somehow
             	// check what the query type is
             	// switch, depending on the query might need to scrape inside it
