@@ -20,32 +20,34 @@ import com.rometools.rome.io.XmlReader;
 
 public class test {
 	public static void main(String [] args) throws IOException {
-		Document doc = Jsoup.connect("http://edition.cnn.com/services/rss/").get();
+		Document doc = Jsoup.connect("https://www.foxsports.com/rss-feeds").get();
+		//System.out.println(doc);
 		Elements table = doc.select("table");
+		//System.out.println(table);
         for (Element row : table.select("tr")) {
-            Elements tds = row.select("td");
+            Elements tds = row.select("p");
             if (tds.size() > 2 && tds.size() < 20 && !tds.text().equals("")) {
-                //System.out.println(tds.get(0).text() + " > " + tds.get(1).text() + " > "+ tds.get(2).text());
+                //System.out.println(tds.get(0).text());
             }
         }
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        Document doc2 = Jsoup.parse("http://rss.cnn.com/rss/edition.rss","" , Parser.xmlParser());
-        for (Element e : doc.select("test")) {
-            System.out.println(e);
-        }
-        boolean ok = false;
+        //System.out.println();
+        //System.out.println();
+        //System.out.println();
+        //Document doc2 = Jsoup.parse("http://rss.cnn.com/rss/edition.rss","" , Parser.xmlParser());
+        //for (Element e : doc.select("test")) {
+        //    System.out.println(e);
+        //}
+       boolean ok = false;
        
             try {
-                URL feedUrl = new URL("http://rss.cnn.com/rss/edition.rss");
+                URL feedUrl = new URL("https://api.foxsports.com/v1/rss?=mlb");
 
                 //Map<SyndEntry, SyndEntry> allEntries = new HashMap<SyndEntry, SyndEntry>();
                 SyndFeedInput input = new SyndFeedInput();
                 List<SyndEntry> feed = input.build(new XmlReader(feedUrl)).getEntries();
                 for(SyndEntry entry : feed) {
-                	System.out.println(entry.getTitle());
-                    System.out.println(entry.getDescription().getValue());
+                	System.out.println(entry.getTitle().trim());
+                    System.out.println(entry.getDescription().getValue().trim());
                     System.out.println(entry.getPublishedDate());
                     System.out.println();
                 }
