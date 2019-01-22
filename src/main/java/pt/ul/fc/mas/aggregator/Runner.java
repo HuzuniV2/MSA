@@ -9,6 +9,7 @@ import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 import pt.ul.fc.mas.aggregator.finders.CNNFinder;
+import pt.ul.fc.mas.aggregator.finders.FOXSportsFinder;
 import pt.ul.fc.mas.aggregator.finders.SkyNewsFinder;
 
 import java.util.List;
@@ -28,8 +29,8 @@ public class Runner {
         profile.setParameter(Profile.MAIN_HOST, "localhost");
         AgentContainer container = Runtime.instance().createAgentContainer(profile);
 
-        List<String> topicList = ImmutableList.of("Sport", "Politics", "Science");
-        String searchQuery = "category:Money";
+        List<String> topicList = ImmutableList.of("world", "politics", "technology");
+        String searchQuery = "title:trump";
 
         try {
             for (String topic : topicList) {
@@ -37,6 +38,8 @@ public class Runner {
                     "CNNFinder-" + topic, CNNFinder.class.getName(), new Object[]{topic}).start();
                 container.createNewAgent(
                     "SkyNewsFinder-" + topic, SkyNewsFinder.class.getName(), new Object[]{topic}).start();
+                container.createNewAgent(
+                    "FOXSportsFinder-" + topic, FOXSportsFinder.class.getName(), new Object[]{topic}).start();
             }
             AgentController aggregator =
                 container.createNewAgent(
@@ -46,16 +49,5 @@ public class Runner {
             System.err.println("Error while creating agents: " + e.getMessage());
             System.exit(1);
         }
-
-//        try {
-//            URL myURL = new URL("https://www.dn.pt/");
-//            URLConnection myURLConnection = myURL.openConnection();
-//            myURLConnection.connect();
-//            System.out.println("ok");
-//        } catch (MalformedURLException e) {
-//            System.out.println("not ok");
-//        } catch (IOException e) {
-//            System.out.println("not ok also");
-//        }
     }
 }

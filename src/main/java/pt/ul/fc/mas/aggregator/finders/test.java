@@ -1,22 +1,16 @@
 package pt.ul.fc.mas.aggregator.finders;
 
-import java.io.IOException;
-
-import java.net.URL;
-import java.io.InputStreamReader;
-
-import java.util.*;
-
+import com.rometools.rome.feed.synd.SyndEntry;
+import com.rometools.rome.io.SyndFeedInput;
+import com.rometools.rome.io.XmlReader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
-import com.rometools.rome.feed.synd.SyndEntry;
-import com.rometools.rome.feed.synd.SyndFeed;
-import com.rometools.rome.io.SyndFeedInput;
-import com.rometools.rome.io.XmlReader;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 
 public class test {
 	public static void main(String [] args) throws IOException {
@@ -38,7 +32,6 @@ public class test {
         //    System.out.println(e);
         //}
        boolean ok = false;
-       
             try {
                 URL feedUrl = new URL("https://api.foxsports.com/v1/rss?=mlb");
 
@@ -51,13 +44,11 @@ public class test {
                     System.out.println(entry.getPublishedDate());
                     System.out.println();
                 }
-          
 
                 //System.out.println(feed);
                 //System.out.println(feed.getTitleEx());
                 //System.out.println(feed.getDescriptionEx());
                 //System.out.println(feed.getPublishedDate());
-                
                 
                 ok = true;
             }
@@ -65,7 +56,6 @@ public class test {
                 ex.printStackTrace();
                 System.out.println("ERROR: "+ex.getMessage());
             }
-        
 
         if (!ok) {
             System.out.println();

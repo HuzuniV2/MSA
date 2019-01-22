@@ -91,7 +91,7 @@ public class AggregatorBehaviour extends ContractNetInitiator {
         NewsSearchResult newsSearch = new NewsSearchResult(results);
         System.out.println("Found news:");
         for (News result : results) {
-            System.out.println(result.getContent());
+            System.out.println(result.getDescription());
             System.out.println();
         }
     }
