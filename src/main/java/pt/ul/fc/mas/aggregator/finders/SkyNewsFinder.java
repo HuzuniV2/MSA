@@ -51,7 +51,13 @@ public class SkyNewsFinder extends Agent implements NewsFinderAgent {
         Object[] args = getArguments();
         if (args.length > 0) {
             this.category = (String) args[0];
-            System.out.println("Agent " + getLocalName() + " assigned category: " + this.category);
+            if (!RssUtils.isValidCategoryArg(this.category, HANDLED_CATEGORIES.keySet())) {
+                System.err.println("WARNING: Invalid category for agent " + getLocalName() + ": " + this.category
+                    + " - agent will be assigned the general category.");
+                this.category = "";
+            } else {
+                System.out.println("Agent " + getLocalName() + " assigned category: " + this.category);
+            }
         } else {
             System.out.println("Agent " + getLocalName() + " not assigned a category.");
         }

@@ -1,10 +1,10 @@
 package pt.ul.fc.mas.aggregator.finders;
 
-import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
+import pt.ul.fc.mas.aggregator.model.News;
 import pt.ul.fc.mas.aggregator.model.NewsSearchResult;
 import pt.ul.fc.mas.aggregator.model.SearchQuery;
 
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class RssUtils {
 
     public static NewsSearchResult searchFilterAndResult(SearchQuery query, List<URL> feeds) throws FeedException, IOException {
-        List<SyndEntry> entries = new ArrayList<>();
+        List<News> entries = new ArrayList<>();
         String keyword = query.getKeyword().toLowerCase();
         for (URL feedUrl : feeds) {
             SyndFeedInput input = new SyndFeedInput();
@@ -29,8 +29,32 @@ public class RssUtils {
                     return e.getDescription().getValue().toLowerCase().contains(keyword);
                 }
                 return true;
+            }).map(e -> {
+                String description = "";
+                String source = "";
+                String sourceLink = "";
+                if (e.getDescription() != null) {
+                    description = e.getDescription().getValue();
+                }
+                if (e.getSource() != null) {
+                    source = e.getSource().getTitle();
+                    sourceLink = e.getSource().getLink();
+                }
+                return new News(e.getAuthor(), e.getTitle(), description, e.getLink(),
+                    source, sourceLink, e.getPublishedDate());
             }).collect(Collectors.toList()));
         }
         return new NewsSearchResult(entries);
     }
+
+    public static boolean isValidCategoryArg(String category, Iterable<String> possibleCategories) {
+        category = category.toLowerCase();
+        for (String possible : possibleCategories) {
+            if (possible.toLowerCase().contains(category)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

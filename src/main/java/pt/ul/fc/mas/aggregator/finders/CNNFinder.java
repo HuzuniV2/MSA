@@ -16,6 +16,7 @@ import pt.ul.fc.mas.aggregator.model.SearchQuery;
 import pt.ul.fc.mas.aggregator.util.AgentUtils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import java.util.Map;
 
 public class CNNFinder extends Agent implements NewsFinderAgent {
 
+    private final String RSS_LIST_URL = "http://edition.cnn.com/services/rss/";
     private String category;
     private Map<String, String> themes;
 
@@ -34,12 +36,20 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
      */
     private Map<String, String> getThemes() throws IOException {
         HashMap<String, String> result = new HashMap<>();
-        Document doc = Jsoup.connect("http://edition.cnn.com/services/rss/").get();
+        Document doc = Jsoup.connect(RSS_LIST_URL).get();
         Elements table = doc.select("table");
         for (Element row : table.select("tr")) {
-            Elements tds = row.select("td");
+            Elements tds = row.select("td.cnnRSS");
             if (tds.size() > 2 && tds.size() < 20 && !tds.text().equals("")) {
-                result.put(tds.get(0).text(), tds.get(2).text());
+                try {
+                    String url = tds.get(2).text();
+                    // Validate URL
+                    URL parsed = new URL(url);
+                    String theme = tds.get(0).text();
+                    result.put(theme.toLowerCase(), url);
+                } catch (MalformedURLException e) {
+                    // Omitting invalid entries.
+                }
             }
         }
         return result;
@@ -60,10 +70,22 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
 
         Object[] args = getArguments();
         if (args.length > 0) {
+            try {
+                this.themes = getThemes();
+            } catch (IOException e) {
+                System.err.println("Error while fetching themes for agent " + getLocalName() + ": " + e.getMessage());
+            }
+
             this.category = (String) args[0];
-            System.out.println("Agent " + getLocalName() + " assigned category: " + this.category);
+            if (!RssUtils.isValidCategoryArg(this.category, this.themes.keySet())) {
+                System.err.println("WARNING: Invalid category for agent " + getLocalName() + ": " + this.category
+                    + " - agent will be assigned the general category.");
+                this.category = "";
+            } else {
+                System.out.println("Agent " + getLocalName() + " assigned category: " + this.category);
+            }
         } else {
-            System.out.println("Agent " + getLocalName() + " not assigned a category.");
+            System.out.println("Agent " + getLocalName() + " assigned a general category.");
         }
 
         System.out.println("Agent " + getLocalName() + " waiting for CFP...");
