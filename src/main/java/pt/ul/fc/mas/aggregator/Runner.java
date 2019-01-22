@@ -9,6 +9,7 @@ import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 import pt.ul.fc.mas.aggregator.finders.CNNFinder;
+import pt.ul.fc.mas.aggregator.finders.FOXSportsFinder;
 import pt.ul.fc.mas.aggregator.finders.SkyNewsFinder;
 
 import java.util.List;
@@ -37,6 +38,8 @@ public class Runner {
                     "CNNFinder-" + topic, CNNFinder.class.getName(), new Object[]{topic}).start();
                 container.createNewAgent(
                     "SkyNewsFinder-" + topic, SkyNewsFinder.class.getName(), new Object[]{topic}).start();
+                container.createNewAgent(
+                    "FOXSportsFinder-" + topic, FOXSportsFinder.class.getName(), new Object[]{topic}).start();
             }
             AgentController aggregator =
                 container.createNewAgent(

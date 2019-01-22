@@ -1,21 +1,10 @@
 package pt.ul.fc.mas.aggregator.finders;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
+import com.google.common.collect.ImmutableMap;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.io.FeedException;
-import com.rometools.rome.io.SyndFeedInput;
-import com.rometools.rome.io.XmlReader;
-
 import jade.core.Agent;
+import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
@@ -24,38 +13,33 @@ import pt.ul.fc.mas.aggregator.model.NewsSearchResult;
 import pt.ul.fc.mas.aggregator.model.SearchQuery;
 import pt.ul.fc.mas.aggregator.util.AgentUtils;
 
-@SuppressWarnings("serial")
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class FOXSportsFinder extends Agent implements NewsFinderAgent {
-	
-	private Map<String, String> themes = new HashMap<String, String>();
-	
-	/**
-	 * Builds a Map containing key-theme and value-url from the cnn table
-	 * @param themes
-	 * @throws IOException
-	 */
-	private void getThemes(Map<String, String> themes) throws IOException{
-			themes.put("MLB", "https://api.foxsports.com/v1/rss?=mlb");
-			themes.put("NFL", "https://api.foxsports.com/v1/rss?=nfl");
-			themes.put("NCAAFB", "https://api.foxsports.com/v1/rss?=cfb");
-			themes.put("NBA", "https://api.foxsports.com/v1/rss?=nba");
-			themes.put("NHL", "https://api.foxsports.com/v1/rss?=nhl");
-			themes.put("NCAABK", "https://api.foxsports.com/v1/rss?=cbk");
-			themes.put("NASCAR", "https://api.foxsports.com/v1/rss?=nascar");
-			themes.put("UFC", "https://api.foxsports.com/v1/rss?=ufc");
-			themes.put("Motor", "https://api.foxsports.com/v1/rss?=motor");
-			themes.put("Golf", "https://api.foxsports.com/v1/rss?=golf");
-			themes.put("Soccer", "https://api.foxsports.com/v1/rss?=soccer");
-			themes.put("Olympics", "https://api.foxsports.com/v1/rss?=olympics");
-			themes.put("Tennis", "https://api.foxsports.com/v1/rss?=tennis");
-			themes.put("Horseracing", "https://api.foxsports.com/v1/rss?=horse-racing");
-			themes.put("WNBA", "https://api.foxsports.com/v1/rss?=wnba");
-			themes.put("WCBK", "https://api.foxsports.com/v1/rss?=wcbk");		
-	}
-	
-	
-	
-	
+
+    private static final String RSS_PREFIX = "https://api.foxsports.com/v1/rss?";
+
+    public static final Map<String, String> THEMES = ImmutableMap.<String, String>builder()
+        .put("NFL", RSS_PREFIX + "tag=nfl")
+        .put("NCAAFB", RSS_PREFIX + "tag=cfb")
+        .put("NBA", RSS_PREFIX + "tag=nba")
+        .put("NHL", RSS_PREFIX + "tag=nhl")
+        .put("NCAABK", RSS_PREFIX + "tag=cbk")
+        .put("NASCAR", RSS_PREFIX + "tag=nascar")
+        .put("UFC", RSS_PREFIX + "tag=ufc")
+        .put("Motor", RSS_PREFIX + "tag=motor")
+        .put("Golf", RSS_PREFIX + "=golf")
+        .put("Soccer", RSS_PREFIX + "=soccer")
+        .put("Olympics", RSS_PREFIX + "=olympics")
+        .put("Tennis", RSS_PREFIX + "=tennis")
+        .put("Horseracing", RSS_PREFIX + "=horse-racing")
+        .put("WNBA", RSS_PREFIX + "=wnba")
+        .put("WCBK", RSS_PREFIX + "=wcbk")
+        .build();
 
     private String category;
     private List<SyndEntry> feed = new ArrayList<SyndEntry>();
@@ -89,101 +73,49 @@ public class FOXSportsFinder extends Agent implements NewsFinderAgent {
         addBehaviour(new NewsFinderBehaviour(this, template) {
             @Override
             public boolean evaluateSearchQuery(SearchQuery query) {
-				try {
-					getThemes(themes);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				if (query.getType() == SearchQuery.SearchType.CATEGORY) {
-					if (!category.isEmpty()) {
-						// Specialized finder - respond only if asked for the specialized category.
-						return category.equalsIgnoreCase(query.getKeyword());
-	                } 
-					else {
-						// General finder, without specified category - respond to any of handled categories.
-	                    return themes.containsKey(query.getKeyword().toLowerCase());
-	                   }
-	                }
-	                return true;
+                if (query.getType() == SearchQuery.SearchType.CATEGORY) {
+                    if (!category.isEmpty()) {
+                        // Specialized finder - respond only if asked for the specialized category.
+                        return category.equalsIgnoreCase(query.getKeyword());
+                    } else {
+                        // General finder, without specified category - respond to any of handled categories.
+                        return THEMES.containsKey(query.getKeyword().toLowerCase());
+                    }
+                }
+                return true;
+            }
+            /**
+             * Checks whether {@code categoryKeyword} is valid, i.e. is one of {@code HANDLED_CATEGORIES},
+             * and in case the finder is specialised, whether it matches the finder's specialisation.
+             */
+            private boolean isValidCategory(String categoryKeyword) {
+                return THEMES.containsKey(categoryKeyword.toLowerCase()) &&
+                    (category.isEmpty() || category.equalsIgnoreCase(categoryKeyword));
             }
 
             @Override
-            public NewsSearchResult performSearch(SearchQuery query) {
-            	
-            	
-            	switch(query.getType()) {
-            	
-            	case TITLE:
-            		//for each rss url in the table
-            		themes.forEach((key, value) -> {
-            			try {
-							URL feedUrl = new URL(value);
-							SyndFeedInput input = new SyndFeedInput();
-							try {
-								//copy the all entries
-								List<SyndEntry> temp = input.build(new XmlReader(feedUrl)).getEntries();
-								//for each entry containing the keyword in the title, that entry gets copied
-								for(SyndEntry entry : temp) {
-									if (entry.getTitle().toLowerCase().trim().contains(query.getKeyword().toLowerCase())) {
-										feed.add(entry);
-									}
-								}
-							} catch (IllegalArgumentException | FeedException | IOException e) {
-								e.printStackTrace();
-							}
-						} catch (MalformedURLException e) {
-							e.printStackTrace();
-						}
-            		});			
-            		break;
-            		
-            	case CONTENT:
-            		//for each rss url in the table
-            		themes.forEach((key, value) -> {
-            			try {
-							URL feedUrl = new URL(value);
-							SyndFeedInput input = new SyndFeedInput();
-							try {
-								//copy the all entries
-								List<SyndEntry> temp = input.build(new XmlReader(feedUrl)).getEntries();
-								//for each entry containing the keyword in the description, that entry gets copied
-								for(SyndEntry entry : temp) {
-									if (entry.getDescription().toString().toLowerCase().trim().contains(query.getKeyword().toLowerCase())) {
-										feed.add(entry);
-									}
-								}
-							} catch (IllegalArgumentException | FeedException | IOException e) {
-								e.printStackTrace();
-							}
-						} catch (MalformedURLException e) {
-							e.printStackTrace();
-						}
-            		});	
-            		break;
-            		
-            	case CATEGORY:
-            		try {
-						URL feedUrl = new URL(themes.get(query.getKeyword()));
-						SyndFeedInput input = new SyndFeedInput();
-		                try {
-		                	// Gets all entries
-							feed = input.build(new XmlReader(feedUrl)).getEntries();
-						} catch (IllegalArgumentException | FeedException | IOException e) {
-							e.printStackTrace();
-						}
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					}
-            		
-            		break;
-				default:
-					throw new IllegalArgumentException("Unknown type of keyword: " + query.getType());
-            	}
-				
-               
-            	NewsSearchResult news = new NewsSearchResult(feed);
-            	return news;
-            	
+            public NewsSearchResult performSearch(SearchQuery query) throws FailureException {
+                try {
+                    List<URL> matchingFeeds = new ArrayList<>();
+                    if (query.getType() == SearchQuery.SearchType.CATEGORY) {
+                        if (!isValidCategory(query.getKeyword())) {
+                            throw new FailureException("Non-handled category requested.");
+                        }
+                        matchingFeeds.add(new URL(THEMES.get(query.getKeyword().toLowerCase())));
+                    } else if (!category.isEmpty() && THEMES.containsKey(category)) {
+                        // Specialised finder for <category>
+                        matchingFeeds.add(new URL(THEMES.get(category)));
+                    } else {
+                        for (String url : THEMES.values()) {
+                            matchingFeeds.add(new URL(url));
+                        }
+                    }
+
+                    // Filter results for each feed based on the query
+                    return RssUtils.searchFilterAndResult(query, matchingFeeds);
+                } catch (FeedException | IOException e) {
+                    throw new FailureException("Unexpected error: " + e.getMessage());
+                }
             }
         });
     }

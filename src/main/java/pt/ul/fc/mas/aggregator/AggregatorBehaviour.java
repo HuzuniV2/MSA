@@ -1,10 +1,10 @@
 package pt.ul.fc.mas.aggregator;
 
 import com.google.gson.Gson;
+import com.rometools.rome.feed.synd.SyndEntry;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
 import jade.proto.ContractNetInitiator;
-import pt.ul.fc.mas.aggregator.model.News;
 import pt.ul.fc.mas.aggregator.model.NewsSearchResult;
 
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class AggregatorBehaviour extends ContractNetInitiator {
 
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
-        ArrayList<News> results = new ArrayList<>();
+        ArrayList<SyndEntry> results = new ArrayList<>();
         Gson gson = new Gson();
 
         // Evaluate proposals.
@@ -90,8 +90,8 @@ public class AggregatorBehaviour extends ContractNetInitiator {
         // TODO: handle displaying the news. Send to Presenter agent?
         NewsSearchResult newsSearch = new NewsSearchResult(results);
         System.out.println("Found news:");
-        for (News result : results) {
-            System.out.println(result.getContent());
+        for (SyndEntry result : results) {
+            System.out.println(result.getContents());
             System.out.println();
         }
     }
