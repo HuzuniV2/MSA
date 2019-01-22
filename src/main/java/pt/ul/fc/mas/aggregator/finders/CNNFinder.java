@@ -10,7 +10,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.google.common.collect.ImmutableList;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
@@ -23,9 +22,9 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import pt.ul.fc.mas.aggregator.model.NewsSearchResult;
 import pt.ul.fc.mas.aggregator.model.SearchQuery;
-import pt.ul.fc.mas.aggregator.model.SearchQuery.SearchType;
 import pt.ul.fc.mas.aggregator.util.AgentUtils;
 
+@SuppressWarnings("serial")
 public class CNNFinder extends Agent implements NewsFinderAgent {
 	
 	private Map<String, String> themes = new HashMap<String, String>();
@@ -51,6 +50,7 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
 	
 
     private String category;
+    private List<SyndEntry> feed = new ArrayList<SyndEntry>();
 
     @Override
     public String getCategory() {
@@ -81,44 +81,89 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
         addBehaviour(new NewsFinderBehaviour(this, template) {
             @Override
             public boolean evaluateSearchQuery(SearchQuery query) {
-            	try {
+				try {
 					getThemes(themes);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-                // Checks if the query type is a valid one, if its not it refuses the contract
-            	Boolean valid = false;
-            	if (query.getType() == SearchQuery.SearchType.CATEGORY)
-            		valid = true;
-                return valid;
+				if (query.getType() == SearchQuery.SearchType.CATEGORY) {
+					if (!category.isEmpty()) {
+						// Specialized finder - respond only if asked for the specialized category.
+						return category.equalsIgnoreCase(query.getKeyword());
+	                } 
+					else {
+						// General finder, without specified category - respond to any of handled categories.
+	                    return themes.containsKey(query.getKeyword().toLowerCase());
+	                   }
+	                }
+	                return true;
             }
 
             @Override
             public NewsSearchResult performSearch(SearchQuery query) {
+            	
+            	
             	switch(query.getType()) {
+            	
             	case TITLE:
+            		//for each rss url in the table
+            		themes.forEach((key, value) -> {
+            			try {
+							URL feedUrl = new URL(value);
+							SyndFeedInput input = new SyndFeedInput();
+							try {
+								//copy the all entries
+								List<SyndEntry> temp = input.build(new XmlReader(feedUrl)).getEntries();
+								//for each entry containing the keyword in the title, that entry gets copied
+								for(SyndEntry entry : temp) {
+									if (entry.getTitle().toLowerCase().contains(query.getKeyword().toLowerCase())) {
+										feed.add(entry);
+									}
+								}
+							} catch (IllegalArgumentException | FeedException | IOException e) {
+								e.printStackTrace();
+							}
+						} catch (MalformedURLException e) {
+							e.printStackTrace();
+						}
+            		});			
             		break;
+            		
             	case CONTENT:
+            		//for each rss url in the table
+            		themes.forEach((key, value) -> {
+            			try {
+							URL feedUrl = new URL(value);
+							SyndFeedInput input = new SyndFeedInput();
+							try {
+								//copy the all entries
+								List<SyndEntry> temp = input.build(new XmlReader(feedUrl)).getEntries();
+								//for each entry containing the keyword in the description, that entry gets copied
+								for(SyndEntry entry : temp) {
+									if (entry.getDescription().toString().toLowerCase().contains(query.getKeyword().toLowerCase())) {
+										feed.add(entry);
+									}
+								}
+							} catch (IllegalArgumentException | FeedException | IOException e) {
+								e.printStackTrace();
+							}
+						} catch (MalformedURLException e) {
+							e.printStackTrace();
+						}
+            		});	
             		break;
+            		
             	case CATEGORY:
             		try {
-						URL feedUrl = new URL(themes.get(query.getType()));
+						URL feedUrl = new URL(themes.get(query.getKeyword()));
 						SyndFeedInput input = new SyndFeedInput();
 		                try {
-							List<SyndEntry> feed = input.build(new XmlReader(feedUrl)).getEntries();
-						} catch (IllegalArgumentException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (FeedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
+		                	// Gets all entries
+							feed = input.build(new XmlReader(feedUrl)).getEntries();
+						} catch (IllegalArgumentException | FeedException | IOException e) {
 							e.printStackTrace();
 						}
 					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
             		
@@ -127,11 +172,10 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
 					throw new IllegalArgumentException("Unknown type of keyword: " + query.getType());
             	}
 				
-                // if it is in the feed, get it somehow
-            	// check what the query type is
-            	// switch, depending on the query might need to scrape inside it
-                // TODO: Implement.
-                return new NewsSearchResult(ImmutableList.of());
+               
+            	NewsSearchResult news = new NewsSearchResult(feed);
+            	return news;
+            	
             }
         });
     }
