@@ -1,6 +1,4 @@
-# MSA
-May papa moniz watch over us
-
+# MAS (Multi-Agent Systems)
 
 # Agents
 
