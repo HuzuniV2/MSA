@@ -61,8 +61,6 @@ public class Aggregator extends Agent {
                 msg.addReceiver(finderAgent);
             }
             msg.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-            // We want to receive a reply in 10 secs
-            // msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 
             SearchQuery query = parseQuery((String) args[0]);
             Gson gson = new Gson();

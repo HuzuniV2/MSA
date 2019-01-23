@@ -50,7 +50,7 @@ public class SkyNewsFinder extends Agent implements NewsFinderAgent {
 
         Object[] args = getArguments();
         if (args.length > 0) {
-            this.category = (String) args[0];
+            this.category = ((String) args[0]).toLowerCase();
             if (!RssUtils.isValidCategoryArg(this.category, HANDLED_CATEGORIES.keySet())) {
                 System.err.println("WARNING: Invalid category for agent " + getLocalName() + ": " + this.category
                     + " - agent will be assigned the general category.");
