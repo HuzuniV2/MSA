@@ -29,8 +29,8 @@ public class Runner {
         profile.setParameter(Profile.MAIN_HOST, "localhost");
         AgentContainer container = Runtime.instance().createAgentContainer(profile);
 
-        List<String> topicList = ImmutableList.of("world", "politics", "technology");
-        String searchQuery = "title:trump";
+        List<String> topicList = ImmutableList.of("world", "politics", "technology", "");
+        String searchQuery = "content:trump";
 
         try {
             for (String topic : topicList) {
@@ -44,7 +44,11 @@ public class Runner {
             AgentController aggregator =
                 container.createNewAgent(
                     "aggregator", Aggregator.class.getName(), new Object[]{searchQuery});
+            AgentController presenter =
+                container.createNewAgent(
+                    "presenter", Presenter.class.getName(), new Object[]{});
             aggregator.start();
+            presenter.start();
         } catch (StaleProxyException e) {
             System.err.println("Error while creating agents: " + e.getMessage());
             System.exit(1);

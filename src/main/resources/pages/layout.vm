@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>Your News for Today</title>
+    <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+    <main>
+        <div id="content">
+            #foreach($n in $news)
+                <div class="post-preview">
+                    <a href="$n.link">
+                        <h2 class="post-title">$n.title</h2>
+                        <h3 class="post-subtitle"> $n.description </h3>
+                    </a>
+                    <p class="post-meta">
+                        Posted by <a href="$n.sourceLink">$n.source</a>, at $n.publishedDate
+                    </p>
+                </div>
+            #end
+        </div>
+    </main>
+</body>
+</html>

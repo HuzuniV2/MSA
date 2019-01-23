@@ -59,7 +59,7 @@ public class FOXSportsFinder extends Agent implements NewsFinderAgent {
 
         Object[] args = getArguments();
         if (args.length > 0) {
-            this.category = (String) args[0];
+            this.category = ((String) args[0]).toLowerCase();
             if (!RssUtils.isValidCategoryArg(this.category, THEMES.keySet())) {
                 System.err.println("WARNING: Invalid category for agent " + getLocalName() + ": " + this.category
                     + " - agent will be assigned the general category.");

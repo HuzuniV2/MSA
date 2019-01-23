@@ -1,14 +1,18 @@
 package pt.ul.fc.mas.aggregator;
 
 import com.google.gson.Gson;
+import jade.core.AID;
 import jade.core.Agent;
+import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.proto.ContractNetInitiator;
 import pt.ul.fc.mas.aggregator.model.News;
 import pt.ul.fc.mas.aggregator.model.NewsSearchResult;
+import pt.ul.fc.mas.aggregator.util.AgentUtils;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 public class AggregatorBehaviour extends ContractNetInitiator {
@@ -87,12 +91,29 @@ public class AggregatorBehaviour extends ContractNetInitiator {
             }
         }
 
-        // TODO: handle displaying the news. Send to Presenter agent?
         NewsSearchResult newsSearch = new NewsSearchResult(results);
-        System.out.println("Found news:");
-        for (News result : results) {
-            System.out.println(result.getDescription());
-            System.out.println();
+        try {
+            final List<AID> presenters = AgentUtils.getAgents(myAgent, "Presenter");
+            if (presenters.size() > 0) {
+                final AID presenter = presenters.get(0);
+                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                msg.setConversationId(Presenter.PRESENT_RESULTS_MSG);
+                msg.addReceiver(presenter);
+                msg.setContent(gson.toJson(newsSearch));
+                System.out.println("Aggregator: Delegating presenting the results to agent: " + presenter.getName());
+                myAgent.send(msg);
+            } else {
+                System.err.println("Aggregator: No presenters to view the search results.");
+                for (News news : newsSearch.getResults()) {
+                    System.out.println("Author: " + news.getAuthor());
+                    System.out.println("Title: " + news.getTitle());
+                    System.out.println(news.getDescription());
+                    System.out.println(news.getLink());
+                    System.out.println();
+                }
+            }
+        } catch (FIPAException e1) {
+            System.err.println("Error while sending the results: " + e1.getMessage());
         }
     }
 }

@@ -76,7 +76,7 @@ public class CNNFinder extends Agent implements NewsFinderAgent {
                 System.err.println("Error while fetching themes for agent " + getLocalName() + ": " + e.getMessage());
             }
 
-            this.category = (String) args[0];
+            this.category = ((String) args[0]).toLowerCase();
             if (!RssUtils.isValidCategoryArg(this.category, this.themes.keySet())) {
                 System.err.println("WARNING: Invalid category for agent " + getLocalName() + ": " + this.category
                     + " - agent will be assigned the general category.");
