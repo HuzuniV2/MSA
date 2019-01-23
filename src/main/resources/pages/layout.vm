@@ -4,20 +4,34 @@
     <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-    <main>
-        <div id="content">
-            #foreach($n in $news)
-                <div class="post-preview">
-                    <a href="$n.link">
-                        <h2 class="post-title">$n.title</h2>
-                        <h3 class="post-subtitle"> $n.description </h3>
-                    </a>
-                    <p class="post-meta">
-                        Posted by <a href="$n.sourceLink">$n.source</a>, at $n.publishedDate
-                    </p>
-                </div>
-            #end
+    <header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="site-heading">
+              <h1>Good morning</h1>
+              <hr class="small">
+              <span class="subheading">Here are today's news for you</span></div>
+          </div>
         </div>
-    </main>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        #foreach($n in $news)
+          <div class="post-preview">
+            <a href="$n.link">
+              <h2 class="post-title">$n.title</h2>
+              <h3 class="post-subtitle">$n.description</h3>
+            </a>
+            <p class="post-meta">Posted: <a href="$n.sourceLink">$n.source</a> at $n.publishedDate
+            </p>
+          </div>
+          <hr>
+        #end
+        </div>
+      </div>
+    </div>
 </body>
 </html>

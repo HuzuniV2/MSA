@@ -12,7 +12,9 @@ import pt.ul.fc.mas.aggregator.util.AgentUtils;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 public class AggregatorBehaviour extends ContractNetInitiator {
@@ -73,7 +75,7 @@ public class AggregatorBehaviour extends ContractNetInitiator {
 
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
-        ArrayList<News> results = new ArrayList<>();
+        Map<String, News> resultsUnique = new HashMap<>();
         Gson gson = new Gson();
 
         // Evaluate proposals.
@@ -82,16 +84,22 @@ public class AggregatorBehaviour extends ContractNetInitiator {
             ACLMessage msg = (ACLMessage) e.nextElement();
             if (msg.getPerformative() == ACLMessage.INFORM) {
                 NewsSearchResult searchResult = gson.fromJson(msg.getContent(), NewsSearchResult.class);
-                System.out.println("Agent " + msg.getSender().getName() + " found: " + searchResult.getResults().size() + " news.");
-                if (searchResult.getResults().size() > 0) {
-                    results.addAll(searchResult.getResults());
+                List<News> res = searchResult.getResults();
+                System.out.println("Agent " + msg.getSender().getName() + " found: " + res.size() + " news.");
+                if (res.size() > 0) {
+                    for (News news : res) {
+                        // Deduplication
+                        if (!resultsUnique.containsKey(news.getTitle())) {
+                            resultsUnique.put(news.getTitle(), news);
+                        }
+                    }
                 }
             } else if (msg.getPerformative() == ACLMessage.FAILURE) {
                 System.out.println("Agent " + msg.getSender().getName() + " failed: " + msg.getContent());
             }
         }
 
-        NewsSearchResult newsSearch = new NewsSearchResult(results);
+        NewsSearchResult newsSearch = new NewsSearchResult(new ArrayList<>(resultsUnique.values()));
         try {
             final List<AID> presenters = AgentUtils.getAgents(myAgent, "Presenter");
             if (presenters.size() > 0) {
