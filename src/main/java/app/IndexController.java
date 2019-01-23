@@ -20,8 +20,9 @@ public class IndexController {
     public static Handler updateIndexPage = ctx -> {
         Map<String, Object> model = new HashMap<>();
         final Gson gson = new Gson();
-        if (!ctx.body().isEmpty()) {
-            final List<News> news = gson.fromJson(ctx.body(), new TypeToken<List<News>>(){}.getType());
+        final String body = ctx.body();
+        if (!body.isEmpty()) {
+            final List<News> news = gson.fromJson(body, new TypeToken<List<News>>(){}.getType());
             Main.feed = news;
             model.put("news", news);
         } else {
