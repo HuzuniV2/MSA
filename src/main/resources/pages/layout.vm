@@ -10,8 +10,20 @@
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
             <div class="site-heading">
               <h1>Good morning</h1>
-              <hr class="small">
-              <span class="subheading">Here are today's news for you</span></div>
+              <span class="subheading">
+                <form method="post" action="/news">
+                    <div class="radio-group">
+                        <input type="radio" id="title" value="title" name="type" checked>
+                          <label for="title">Title</label>
+                        <input type="radio" id="content" value="content" name="type">
+                          <label for="content">Content</label>
+                        <input type="radio" id="category" value="category" name="type">
+                          <label for="category">Category</label>
+                    </div>
+                    <br>
+                    <input class="search_input" type="text" placeholder="Search" name="keyword">
+                </form>
+              </span>
           </div>
         </div>
       </div>
