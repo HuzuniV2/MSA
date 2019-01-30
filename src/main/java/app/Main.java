@@ -23,6 +23,7 @@ public class Main {
         app.routes(() -> {
             get("/", IndexController.serveIndexPage);
             post("/", IndexController.updateIndexPage);
+            post("/news", IndexController.handleSearchRequest);
         });
     }
 }

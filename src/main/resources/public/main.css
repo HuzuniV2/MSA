@@ -152,19 +152,19 @@ hr.small {
   -moz-background-size: cover;
   background-size: cover;
   -o-background-size: cover;
-  margin-bottom: 50px;
+  margin-bottom: 30px;
 }
 .intro-header .site-heading,
 .intro-header .post-heading,
 .intro-header .page-heading {
-  padding: 100px 0 50px;
+  padding: 30px 0 20px;
   color: white;
 }
 @media only screen and (min-width: 768px) {
   .intro-header .site-heading,
   .intro-header .post-heading,
   .intro-header .page-heading {
-    padding: 150px 0;
+    padding: 30px 0;
   }
 }
 .intro-header .site-heading,
@@ -174,11 +174,11 @@ hr.small {
 .intro-header .site-heading h1,
 .intro-header .page-heading h1 {
   margin-top: 0;
-  font-size: 50px;
+  font-size: 35px;
 }
 .intro-header .site-heading .subheading,
 .intro-header .page-heading .subheading {
-  font-size: 24px;
+  font-size: 16px;
   line-height: 1.1;
   display: block;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -188,7 +188,7 @@ hr.small {
 @media only screen and (min-width: 768px) {
   .intro-header .site-heading h1,
   .intro-header .page-heading h1 {
-    font-size: 80px;
+    font-size: 50px;
   }
 }
 .intro-header .post-heading h1 {
@@ -201,7 +201,7 @@ hr.small {
 }
 .intro-header .post-heading .subheading {
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 24px;
+  font-size: 16px;
   margin: 10px 0 30px;
   font-weight: 600;
 }
@@ -216,10 +216,10 @@ hr.small {
 }
 @media only screen and (min-width: 768px) {
   .intro-header .post-heading h1 {
-    font-size: 55px;
+    font-size: 35px;
   }
   .intro-header .post-heading .subheading {
-    font-size: 30px;
+    font-size: 24px;
   }
 }
 .post-preview > a {
@@ -404,4 +404,60 @@ img::-moz-selection {
 }
 body {
   -webkit-tap-highlight-color: #0085A1;
+}
+
+.search_input {
+    width: 50%;
+    padding: 12px 24px;
+
+    /* transition: transform 250ms ease-in-out; */
+    font-size: 16px;
+    line-height: 20px;
+
+    color: #575756;
+    background-color: white;
+
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 18px 18px;
+    background-position: 95% center;
+    border-radius: 50px;
+    border: 3px solid #575756;
+    transition: all 250ms ease-in-out;
+    backface-visibility: hidden;
+    /* transform-style: preserve-3d; */
+
+    &::placeholder {
+        color: color(#575756 a(0.8));
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+}
+
+input[type=radio] {
+  position: absolute;
+  visibility: hidden;
+  display: none;
+}
+
+label {
+  color: white;
+  display: inline-block;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 5px 20px;
+  background: transparent;
+}
+
+input[type=radio]:checked + label{
+  color: #575756;
+  background: white;
+}
+
+.radio-group {
+  border: solid 3px white;
+  display: inline-block;
+  margin: 20px;
+  border-radius: 10px;
+  overflow: hidden;
 }

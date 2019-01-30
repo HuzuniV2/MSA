@@ -48,7 +48,7 @@ public abstract class NewsFinderBehaviour extends ContractNetResponder {
         } else {
             // We refuse to provide a proposal
             System.out.println("Agent " + myAgent.getLocalName() + ": Refuse");
-            throw new RefuseException("evaluation-failed");
+            throw new RefuseException("evaluation failed");
         }
     }
 
