@@ -1,6 +1,10 @@
 # MAS (Multi-Agent Systems)
 
-# Agents
+# DESCRIPTION WAS FOR DEVELOPMENT; IRRELEVANT
+
+
+
+## Agents
 
 ### Aglomerator
 Get arguments such as Politics:FMI:title, or Sports:Ronaldo:Body (type:keyword:partRequested), and asks agents of that certain type,
